@@ -1,0 +1,98 @@
+---
+title: "prolific_payment"
+author: "Armin"
+date: "2025-11-24"
+output:
+  html_document:
+    toc: true
+    toc_depth: '5'
+    df_print: paged
+  html_notebook:
+    toc: true
+    toc_float: true
+    toc_depth: 5
+    code_folding: hide
+  word_document:
+    toc: true
+    toc_depth: '5'
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Loading packages
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+
+```
+
+### Loading data
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+
+dat_esm  <- read.csv("prolific_pilot.csv", sep = ";")
+dat_base <- read.csv("qualtrics_pilot.csv")
+
+```
+
+
+### Minor cleaning
+
+```{r}
+
+# cleaning and joining esm and baseline data
+dat_esm <- dat_esm %>% 
+  filter(scheduledBeepId != "-1") %>% # filtering intake rows
+  group_by(connectionId) %>% 
+  mutate(total_fill = sum(!is.na(anx_som_2_sliderNeutralPos)),
+         study_id = alias,
+         study_id = toupper(study_id)) %>% # one particpant had lowercase id
+  ungroup() %>% 
+  filter(!is.na(anx_som_2_sliderNeutralPos)) %>% 
+  select("study_id", "connectionId", "total_fill") 
+
+
+dat_base <- dat_base[-c(1,2), ] # removing first two non-data rows from qualtrics csv
+dat_base <- dat_base %>%
+  select("study_id", "PROLIFIC_PID")
+
+dat <- dat_esm %>% 
+  left_join(dat_base, by = "study_id")
+  
+# calculating bonuses
+# based on https://docs.google.com/spreadsheets/d/1KwXkGxeep8NdwvREutBWaeAHLPr17QvEiGWASuHVxnA/edit?gid=0#gid=0
+dat <- dat %>% 
+  mutate(beep_bonus      = total_fill * 0.13,                    # below 80%, GBP/survey is 0.13
+         threshold_bonus = ifelse(total_fill >= 64, 3.15, 0.00), # 80% of all available surveys (20x4) is 64
+         bonus           = beep_bonus + threshold_bonus          # total bonus is the sum of the two
+         ) %>% 
+  distinct() %>% 
+  select("PROLIFIC_PID", "bonus")
+
+```
+
+### Writing .csv for bulk bonus payment
+
+```{r}
+
+write.csv(dat, "prolific_bonuses.txt", row.names = FALSE, quote = FALSE)
+
+```
+
+
+
+
+
+
+
+
