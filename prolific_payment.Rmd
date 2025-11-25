@@ -84,7 +84,7 @@ dat <- dat %>%
 
 ```{r}
 
-write.csv(dat, "prolific_bonuses.txt", row.names = FALSE, quote = FALSE)
+# write.csv(dat, "prolific_bonuses.txt", row.names = FALSE, quote = FALSE)
 
 ```
 
