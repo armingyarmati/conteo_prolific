@@ -80,7 +80,7 @@ dat <- dat %>%
 
 ```
 
-### Writing .csv for bulk bonus payment
+### Writing .txt for bulk bonus payment
 
 ```{r}
 
