@@ -71,8 +71,8 @@ dat <- dat_esm %>%
 # calculating bonuses
 # based on https://docs.google.com/spreadsheets/d/1KwXkGxeep8NdwvREutBWaeAHLPr17QvEiGWASuHVxnA/edit?gid=0#gid=0
 dat <- dat %>% 
-  mutate(beep_bonus      = total_fill * 0.13,                    # below 80%, GBP/survey is 0.13
-         threshold_bonus = ifelse(total_fill >= 64, 3.15, 0),    # 80% of all available surveys (20x4) is 64
+  mutate(beep_bonus      = total_fill * 0.17,                    # below 80%, USD/survey is 0.17
+         threshold_bonus = ifelse(total_fill >= 64, 4.12, 0),    # 80% of all available surveys (20x4) is 64
          bonus           = beep_bonus + threshold_bonus          # total bonus is the sum of the two
          ) %>% 
   distinct() %>% 
