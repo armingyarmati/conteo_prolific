@@ -87,6 +87,20 @@ dat <- dat %>%
 
 ```
 
+
+```{r}
+tibble(
+  total_fill = 80
+) %>%
+  mutate(
+    total_fill_capped = min(c(total_fill, 64)),
+    beep_bonus        = total_fill_capped * 0.21,                    # below 80%, USD/survey is 0.17
+    threshold_bonus   = ifelse(total_fill >= 64, 4.12, 0),    # 80% of all available surveys (20x4) is 64
+    bonus             = beep_bonus + threshold_bonus          # total bonus is the sum of the two
+         ) 
+```
+
+
 ### Writing .txt for bulk bonus payment
 
 ```{r}
