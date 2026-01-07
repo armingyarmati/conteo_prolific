@@ -42,7 +42,6 @@ dat_prol <- read.csv("prolific_pilot_dat.csv")
 
 ```
 
-
 ### Minor cleaning
 
 ```{r}
@@ -71,35 +70,23 @@ dat <- dat_esm %>%
 # calculating bonuses
 # based on https://docs.google.com/spreadsheets/d/1KwXkGxeep8NdwvREutBWaeAHLPr17QvEiGWASuHVxnA/edit?gid=0#gid=0
 
-per_survey_bonus <- 0.22    # up to 63 survey fill, beyond that only one time bonus
-threshold_fill   <- 64      # one time bonus threshold 
-threshold_bonus  <- 4.12    # one time bonus
-prolific_sent    <- 3.57    # payment already sent by Prolific
+per_survey_bonus <- 0.1635  # up to 63 survey fill, beyond that only one-time bonus
+threshold_fill   <- 64      # one-time bonus threshold 
+threshold_bonus  <- 4.12    # one-time bonus
 
 dat <- dat %>%
   mutate(
     beyond_threshold = as.integer(total_fill >= threshold_fill),
     beep_bonus       = pmin(total_fill, threshold_fill - 1) * per_survey_bonus,
-    bonus            = beep_bonus + beyond_threshold * threshold_bonus - prolific_sent
+    bonus            = beep_bonus + beyond_threshold * threshold_bonus
   ) %>%
   distinct() %>% 
   select("Submission.id", "bonus")
 
+# NOTE don't forget to check that people beyond 80% are given USD 17.85 minus money already sent by Prolific
+# rounding can of course lead to small differences, but maximum available payment should be given exactly
+
 ```
-
-
-```{r}
-tibble(
-  total_fill = 80
-) %>%
-  mutate(
-    total_fill_capped = min(c(total_fill, 64)),
-    beep_bonus        = total_fill_capped * 0.21,                    # below 80%, USD/survey is 0.17
-    threshold_bonus   = ifelse(total_fill >= 64, 4.12, 0),    # 80% of all available surveys (20x4) is 64
-    bonus             = beep_bonus + threshold_bonus          # total bonus is the sum of the two
-         ) 
-```
-
 
 ### Writing .txt for bulk bonus payment
 
